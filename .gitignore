@@ -1,0 +1,10 @@
+data/
+__pycache__/
+*.pyc
+.DS_Store
+venv/
+.venv/
+*.pbix
+powerbi/data/
+.env
+.claude/settings.local.json
