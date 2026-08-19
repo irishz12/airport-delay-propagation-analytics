@@ -2,7 +2,7 @@
 
 flights and rotation_links share the same column names for every filterable
 dimension (flight_date, reporting_airline, origin, dest), so one WHERE builder
-covers both tables -- no joins or Power BI-style relationships needed.
+covers both tables -- no joins or cross-table relationships needed.
 """
 from db.connection import run_query
 

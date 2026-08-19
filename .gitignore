@@ -5,6 +5,5 @@ __pycache__/
 venv/
 .venv/
 *.pbix
-powerbi/data/
 .env
 .claude/settings.local.json

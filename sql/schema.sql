@@ -83,7 +83,7 @@ CREATE TABLE rotation_links (
 
 
 -- ============================================================
--- Analytical views for Power BI.
+-- Analytical views for the dashboard.
 --
 -- KPI definitions (consistent across every view below):
 --   delay_rate_pct                       = % of completed flights with arr_del15 (arrival delay >= 15 min)

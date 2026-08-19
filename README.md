@@ -58,11 +58,6 @@ Everything downstream of the raw CSVs is derived — the raw data is never
 modified, and every SQL view has a documented, reproducible definition in
 [`sql/schema.sql`](sql/schema.sql).
 
-A Power BI Desktop specification (data model, DAX measures, page layouts) was
-also developed against the same PostgreSQL views and is kept in
-[`powerbi/`](powerbi/) — the interactive dashboard actually built and shipped
-is the Plotly Dash app in [`dashboard/`](dashboard/).
-
 ## Dataset
 
 **Source**: [BTS TranStats — Reporting Carrier On-Time Performance](https://www.transtats.bts.gov/Tables.asp?QO_VQ=EFD),
@@ -248,16 +243,3 @@ Open http://127.0.0.1:8050
   flight, airport, or schedule decision — see the Key Findings section for
   where this caveat applies most directly (turnaround buffer, hub vs. small
   airport comparison).
-
----
-
-## Power BI dashboard
-
-The dashboard is also delivered as a build specification, not a `.pbix`
-file. Built in Power BI Desktop, connecting directly to the local PostgreSQL
-database (`airport_delays`). The full specification (data model, DAX
-measures, page-by-page layout, and methodology/definitions) is in
-[`powerbi/`](powerbi/). The PostgreSQL views defined in
-[`sql/schema.sql`](sql/schema.sql) are the source of truth for all metrics —
-the dashboard reads from them directly and does not re-derive or duplicate
-their logic. The built `.pbix` file is not committed to this repository.
