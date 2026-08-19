@@ -4,6 +4,6 @@ __pycache__/
 .DS_Store
 venv/
 .venv/
-*.pbix
+.pytest_cache/
 .env
 .claude/settings.local.json

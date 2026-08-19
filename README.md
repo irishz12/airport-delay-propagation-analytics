@@ -3,7 +3,7 @@
 A data analytics project that measures how flight delays propagate through the
 U.S. domestic air network — using real 2024 BTS flight data, PostgreSQL, and an
 independently reconstructed aircraft-rotation signal that is cross-validated
-against the FAA/BTS's own delay-cause attribution.
+against the BTS's own delay-cause attribution.
 
 ## The problem
 
@@ -181,16 +181,61 @@ pattern in the dataset.*
 
 ## Local setup
 
-Requires PostgreSQL running locally with the `airport_delays` database loaded
-(see [`sql/schema.sql`](sql/schema.sql) and the `src/` pipeline scripts to
-build it from scratch).
+This is a two-part project with two separate dependency files, installed
+independently:
 
-```
-cd dashboard
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-```
+- **[`requirements.txt`](requirements.txt)** (repo root) — data ingestion,
+  PostgreSQL loading, and aircraft-rotation reconstruction (everything in
+  `src/`)
+- **[`dashboard/requirements.txt`](dashboard/requirements.txt)** — the Plotly
+  Dash app only (everything in `dashboard/`)
+
+Requires PostgreSQL running locally (this project assumes trust auth with no
+password — see [`sql/schema.sql`](sql/schema.sql)).
+
+1. **Get the 2024 BTS monthly files**
+   ```
+   pip install -r requirements.txt
+   python3 src/download_data.py
+   ```
+   Resumable, verified downloads into `data/raw/` — skips months already
+   present, so it's safe to re-run.
+
+2. **Create the database**
+   ```
+   createdb airport_delays
+   ```
+
+3. **Run the SQL schema**
+   ```
+   psql -d airport_delays -f sql/schema.sql
+   ```
+   Creates the `flights`/`rotation_links` tables and the 7 analytical views.
+
+4. **Load the flight data**
+   ```
+   python3 src/load_to_postgres.py
+   ```
+   Bulk `COPY` from `data/raw/` into the `flights` table.
+
+5. **Build and load rotation links**
+   ```
+   python3 src/build_rotations.py
+   python3 src/load_rotation_links.py
+   ```
+   `build_rotations.py` reads `flights` from Postgres and writes
+   `data/processed/rotation_links.csv`; `load_rotation_links.py` bulk-loads
+   that CSV into the `rotation_links` table.
+
+6. **Run the dashboard**
+   ```
+   cd dashboard
+   python3 -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
+   cp .env.example .env
+   python app.py
+   ```
+   Open http://127.0.0.1:8050
 
 ### Environment variables
 
@@ -205,7 +250,9 @@ template):
 | `DB_USER` | Your local Postgres user |
 | `DB_PASSWORD` | Leave blank for local trust auth (this project's default setup) |
 
-### Running the dashboard
+### Running the dashboard again
+
+Once set up, subsequent runs only need:
 
 ```
 cd dashboard
@@ -214,6 +261,19 @@ python app.py
 ```
 
 Open http://127.0.0.1:8050
+
+### Tests
+
+A small, focused test suite covers the deterministic logic that doesn't
+require a live database — the rotation-link/propagation-estimate calculation
+(`src/build_rotations.py`) and the dashboard's filter-building helpers
+(`dashboard/queries/filters.py`). No BTS download or PostgreSQL connection is
+needed to run it.
+
+```
+pip install pytest
+pytest tests/
+```
 
 ## Limitations
 
@@ -243,3 +303,10 @@ Open http://127.0.0.1:8050
   flight, airport, or schedule decision — see the Key Findings section for
   where this caveat applies most directly (turnaround buffer, hub vs. small
   airport comparison).
+
+## License
+
+The code in this repository is licensed under the [MIT License](LICENSE).
+This does not extend to the BTS flight data itself — it's public data from
+the U.S. Bureau of Transportation Statistics, not owned or redistributed by
+this project (see [Dataset](#dataset) for the source).
