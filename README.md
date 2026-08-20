@@ -41,6 +41,7 @@ late-aircraft delay attribution.
 - [Why this matters](#why-this-matters)
 - [Architecture](#architecture)
 - [Dataset](#dataset)
+- [Data quality report](docs/data_quality.md)
 - [Methodology](#methodology)
 - [Signal A vs. Signal B](#signal-a-vs-signal-b)
 - [Operational findings](#operational-findings)
@@ -115,6 +116,9 @@ U.S. domestic passenger traffic).
   times, `Tail_Number`, cancellation/diversion flags, and the five BTS
   delay-cause fields (`CarrierDelay`, `WeatherDelay`, `NASDelay`,
   `SecurityDelay`, `LateAircraftDelay`)
+
+See [`docs/data_quality.md`](docs/data_quality.md) for measured completeness,
+duplicate, domain, and rotation-link validation results.
 
 ## Methodology
 
@@ -202,6 +206,23 @@ questions: where disruption creates the greatest total network impact, and
 where an individual aircraft rotation is most exposed. They do not establish
 that any specific flight's delay was *caused* by a prior flight, airport, or
 schedule choice — see [Limitations](#limitations).
+
+## Business Impact
+
+- **Schedule planning:** The strong relationship between turnaround buffer and
+  downstream delay risk gives planners a measurable way to identify rotations
+  with little recovery time.
+- **Disruption prioritization:** Total propagated-delay minutes highlight the
+  hubs where recovery actions can protect the largest number of flights, while
+  average delay per link reveals smaller airports with high per-rotation
+  exposure.
+- **Operational validation:** Comparing the reconstructed signal with BTS's
+  official attribution shows where a transparent public-data heuristic aligns
+  with reported late-aircraft delay—and where additional operational factors
+  are likely missing.
+
+The analysis supports prioritization and further investigation; it does not
+claim causal impact or prescribe schedule changes on its own.
 
 ## Dashboard
 
