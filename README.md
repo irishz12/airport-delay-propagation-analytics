@@ -73,16 +73,16 @@ data/raw/flights_2024_*.csv        (29 verified columns, 7,079,061 rows)
         │  src/load_to_postgres.py (bulk COPY, not row-by-row)
         ▼
 PostgreSQL: flights table  ────────────────────────┐
-        │  src/build_rotations.py                   │
-        │  (reconstructs aircraft rotations from     │
-        │   Tail_Number, computes Signal B)           │
-        ▼                                             │
-data/processed/rotation_links.csv                     │
-        │  src/load_rotation_links.py                  │
-        ▼                                               │
-PostgreSQL: rotation_links table                         │
-        │                                                │
-        └──────────────┬─────────────────────────────────┘
+        │  src/build_rotations.py                  │
+        │  (reconstructs aircraft rotations from   │
+        │   Tail_Number, computes Signal B)        │
+        ▼                                          │
+data/processed/rotation_links.csv                  │
+        │  src/load_rotation_links.py              │
+        ▼                                          │
+PostgreSQL: rotation_links table                   │
+        │                                          │
+        └──────────────┬───────────────────────────
                         ▼
          sql/schema.sql — 7 analytical views
          (v_network_summary, v_airport_performance,
