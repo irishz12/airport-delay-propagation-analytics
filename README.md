@@ -1,11 +1,54 @@
 # Airport Delay Propagation Analytics
 
-A data analytics project that measures how flight delays propagate through the
-U.S. domestic air network — using real 2024 BTS flight data, PostgreSQL, and an
-independently reconstructed aircraft-rotation signal that is cross-validated
-against the BTS's own delay-cause attribution.
+An end-to-end analytics project that reconstructs how delays move from one
+flight to the next across the U.S. domestic air network. It processes more than
+7 million 2024 BTS flight records in PostgreSQL, links consecutive flights by
+aircraft, and compares the resulting propagation estimate with BTS's official
+late-aircraft delay attribution.
 
-## The problem
+## Project at a glance
+
+| | |
+|---|---|
+| **Question** | How much of a flight's delay can be linked to the same aircraft's previous leg? |
+| **Data** | 7,079,061 U.S. domestic flights across all 12 months of 2024 |
+| **Pipeline** | Resumable BTS ingestion → PostgreSQL → aircraft-rotation reconstruction → analytical views |
+| **Analysis** | Network, airport, route, time-of-day, delay-cause, turnaround, and propagation performance |
+| **Validation** | Independent propagation signal compared with BTS `LateAircraftDelay` attribution |
+| **Output** | Seven-view SQL analytics layer and an interactive seven-tab Plotly Dash dashboard |
+
+### Results at a glance
+
+| Finding | Result |
+|---|---:|
+| Flights delayed by at least 15 minutes | **20.82%** |
+| Share of reported delay minutes attributed to late aircraft | **40.44%** |
+| Valid reconstructed aircraft links among tail-known flights | **95.28%** |
+| Correlation after adjusting for scheduled turnaround buffer | **0.764** |
+| Downstream delay rate: 0–30 min vs. 120+ min turnaround buffer | **69.06% → 15.29%** |
+
+## Technology
+
+| Layer | Tools |
+|---|---|
+| Data ingestion and processing | Python, pandas, Requests, airportsdata |
+| Storage and analytics | PostgreSQL, SQL analytical views, bulk `COPY` |
+| Dashboard | Plotly Dash, Plotly, custom CSS |
+| Validation | pytest |
+
+## Contents
+
+- [Why this matters](#why-this-matters)
+- [Architecture](#architecture)
+- [Dataset](#dataset)
+- [Methodology](#methodology)
+- [Signal A vs. Signal B](#signal-a-vs-signal-b)
+- [Operational findings](#operational-findings)
+- [Dashboard](#dashboard)
+- [Local setup](#local-setup)
+- [Limitations](#limitations)
+
+## Why this matters
 
 When a flight is delayed, the disruption doesn't necessarily stop at that
 flight. If the same aircraft is scheduled to fly again shortly after, its next
@@ -115,7 +158,7 @@ The two are **never combined into a single metric** — every view, chart, and
 KPI keeps them in separate, clearly labeled columns, and the dashboard uses
 one consistent color per signal throughout.
 
-## Key findings
+## Operational findings
 
 All figures below are exact outputs of the SQL views/pipeline described above
 — nothing here is estimated or rounded from a claim not directly computed.
@@ -154,9 +197,11 @@ All figures below are exact outputs of the SQL views/pipeline described above
   because when one aircraft at a low-frequency airport is delayed there's no
   substitute.
 
-None of the above establishes that any specific flight's delay was *caused*
-by a specific prior flight, airport, or schedule choice — see
-[Limitations](#limitations).
+These results can help an operations team distinguish two different planning
+questions: where disruption creates the greatest total network impact, and
+where an individual aircraft rotation is most exposed. They do not establish
+that any specific flight's delay was *caused* by a prior flight, airport, or
+schedule choice — see [Limitations](#limitations).
 
 ## Dashboard
 
@@ -300,8 +345,8 @@ pytest tests/
   2024 patterns; this is a one-year snapshot, not a validated long-term model.
 - **Every finding above is associational.** Nothing in this project
   establishes that a specific flight's delay was *caused* by a specific prior
-  flight, airport, or schedule decision — see the Key Findings section for
-  where this caveat applies most directly (turnaround buffer, hub vs. small
+  flight, airport, or schedule decision — see [Operational findings](#operational-findings)
+  for where this caveat applies most directly (turnaround buffer, hub vs. small
   airport comparison).
 
 ## License
